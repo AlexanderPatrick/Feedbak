@@ -1,0 +1,82 @@
+* {
+	font-family: Helvetica;
+}
+
+body {
+	margin: 0px;
+}
+
+div.header {
+	width:360px;
+	height:50px;
+}
+
+div.instructions {
+	background-color: rgb(238,238,238);
+	text-align:center;
+	font-size:0.8em;
+	margin:0px;
+}
+
+div.content {
+	width:340px;
+	padding:0px 10px 20px;
+}
+
+div.survey {
+	width:340px;
+	padding:20px 10px;
+}
+
+div.questionNumber {
+	width:50px;
+	float:left;
+	font-size:2em;
+}
+
+div.questionText  {
+	width:285px;
+	float:left;
+}
+
+div.commentsLabel {
+	width:100px;
+	float:left;
+}
+
+div.commentsQuestion {
+	width:240px;
+	float:left;
+	font-size:0.8em;"
+}
+
+div.buttonContainer {
+	text-align:center;
+}
+
+ul {
+	list-style-type: none;
+	padding:0px;
+}
+
+li {
+	padding-bottom: 10px;
+}
+
+input[type="text"], input[type="tel"], input[type="email"], input[type="date"], select, textarea {
+	width: 100%;
+}
+
+input[type="button"] {
+	width:160px;
+	height:50px;
+}
+
+textarea {
+	height:300px;
+}
+
+p.copyrightInfo {
+	margin-top:0px;
+	font-size:0.7em;
+}

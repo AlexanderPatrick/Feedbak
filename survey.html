@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<title>Feedbak</title>
+		<link href="img/favicon.ico" rel="icon" type="image/x-icon"/>
+		<link href="css/app.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="header">
+			<img id="headerImage" src="img/feedbak.png" alt="Feedbak"/>
+		</div>
+		<div class="instructions">Please take a minute to complete this survey</div>
+		<div class="survey">
+			<div style="text-align:center;">
+				<span style="font-weight:bold;">Quick Response Buttons</span><br/>
+				<img src="img/happy.png"/> &nbsp; <img src="img/poker.png"/> &nbsp; <img src="img/sad.png"/>
+			</div>
+			<br/>
+			<label for="employeeFullName">Employee's Full Name</label><br/>
+			<input id="employeeFullName" type="text"/><!--This may eventually be a dropdown box that lists the names.-->
+			<ul id="theSurvey"></ul>
+			<li id="questionTemplate" style="display:none;"><div class="questionNumber"></div><div class="questionText"></div><br/><select><option value="4">Strongly Agree</option><option value="3">Agree</option><option value="2">Neutral</option><option value="1">Disagree</option><option value="0">Strongly Disagree</option></select></li>
+			<div class="commentsLabel">
+				<label for="comments">COMMENTS:</label>
+			</div>
+			<div class="commentsQuestion">Is there anything we could have done better to improve your experience?</div>
+			<textarea id="comments"></textarea><br/>
+			<p class="copyrightInfo">The CIBC logo is a trademark of Canadian Imperial Bank of Commerce, used by FirstCaribbean International Bank under license.</p>
+			<div class="buttonContainer">
+				<input id="submitButton" type="button" value="SUBMIT"/>
+			</div>
+		</div>
+		<script>
+			var branchId = location.search.split('=')[1];
+			if (!branchId) {
+				history.go(-1); // back to the main page if no branchID is found.
+			} else {
+				window.addEventListener('load',getSurvey,false);
+				function getSurvey() {
+					var requestTimeout;
+					var xhr = new XMLHttpRequest();
+					xhr.onreadystatechange = function() {
+						if (xhr.readyState == 4 && xhr.status == 200) {
+							if (requestTimeout) clearTimeout(requestTimeout);
+							var response = JSON.parse(xhr.responseText);
+							if (response['error']) {
+								alert('There was a problem getting the survey from the server.');
+							} else {
+								var theSurvey = document.getElementById('theSurvey');
+								var questionTemplate = document.getElementById('questionTemplate');
+								for (var i in response['questions']) {
+									var surveyQuestion = questionTemplate.cloneNode(true);
+									surveyQuestion.style.display = 'block';
+									surveyQuestion.id = response['questions'][i]['id'];
+									var questionNumber = 1+parseInt(i);
+									var questionNumberText = (questionNumber >= 10 ? questionNumber : '0' + questionNumber);
+									questionNumberText += '.';
+									var divs = surveyQuestion.getElementsByTagName('div'); 
+									var questionNumberDiv = divs[0];
+									questionNumberDiv.appendChild(document.createTextNode(questionNumberText));
+									var questionTextDiv = divs[1];
+									questionTextDiv.appendChild(document.createTextNode(response['questions'][i]['questionText']));
+									theSurvey.appendChild(surveyQuestion);
+								}
+							}
+						}
+					}
+					
+					xhr.open('GET','http://localhost:8080/feedbak/server/getsurvey.php?branchId=' + branchId,true);
+					xhr.send();
+					
+					// Set a one second request timeout for if there is no/a weak connection.
+					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 10000);
+				}
+				
+				document.getElementById('submitButton').addEventListener('click',submitResults,false);
+				function submitResults() {
+					var requestTimeout;
+					var xhr = new XMLHttpRequest();
+					xhr.onreadystatechange = function() {
+						if (xhr.readyState == 4 && xhr.status == 200) {
+							if (requestTimeout) clearTimeout(requestTimeout);
+							var response = JSON.parse(xhr.responseText);
+							if (response['status'] == 'success') {
+								location.replace('thanks.html');
+							} else {
+								alert(response['error']);
+							}
+						}
+					}
+					
+					// create the request.
+					xhr.open('POST','http://localhost:8080/feedbak/server/saveresults.php',true);
+					
+					var employeeFullName = document.getElementById('employeeFullName').value;
+					var comments = document.getElementById('comments').value;
+					var postData = 'userId=' + localStorage.userId + '&branchId=' + branchId + '&employeeFullName=' + employeeFullName + '&comments=' + comments;
+					var theSurvey = document.getElementById('theSurvey');
+					for (var i = 0, n = theSurvey.childNodes.length; i < n; i++) {
+						var id = theSurvey.childNodes[i].id;
+						var answer = theSurvey.childNodes[i].getElementsByTagName('select')[0].value;
+						postData += '&question' + id + '=' + answer;
+					}
+					
+					// Send the proper header information along with the request
+					xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+					//xhr.setRequestHeader('Content-length', postData.length);
+					//xhr.setRequestHeader('Connection', 'close');
+					xhr.send(postData);
+					
+					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 10000);
+				}
+			}
+		</script>
+	</body>
+</html>s
