@@ -15,6 +15,7 @@
 				font-size:1.5em;
 			}
 		</style>
+		<script src="js/app.js"></script>
 	</head>
 	<body>
 		<div class="header">
@@ -26,8 +27,6 @@
 			<ul id="branchList"></ul>
 		</div>
 		<script>
-			blackberry.system.event.onHardwareKey( blackberry.system.event.KEY_BACK, function(){ blackberry.app.requestBackground(); } );
-			
 			var watchId, latitude = 0, longitude = 0, distanceThreshold = 0.0005;
 			
 			window.addEventListener('load', getLocation, false);
@@ -35,7 +34,6 @@
 			function getLocation() {
 				navigator.geolocation.getCurrentPosition(geolocationSuccess);
 				watchId = navigator.geolocation.watchPosition(geolocationSuccess); 
-				// All watchPosition does is call getCurrentPosition every ten seconds until clearWatch is called.
 			}
 			
 			function geolocationSuccess(position) {
@@ -74,7 +72,7 @@
 									var branchListItem = document.createElement('li');
 									console.log(response['branches'][i]['branch'] + ' ' + response['branches'][i]['distance']);
 									if (response['branches'][i]['distance'] < distanceThreshold) {
-										branchListItem.style.color = '#FF0000';
+										branchListItem.style.color = '#00FF00';
 									}
 									branchListItem.id = response['branches'][i]['id'];
 									branchListItem.appendChild(document.createTextNode(response['branches'][i]['branch']));
@@ -90,11 +88,10 @@
 					}
 				}
 				
-				xhr.open('GET','http://localhost:8080/feedbak/server/listnearbybranches.php?latitude=' + latitude + '&longitude=' + longitude + '&count=10&format=json',true);
+				xhr.open('GET',host + '/feedbak/server/listnearbybranches.php?latitude=' + latitude + '&longitude=' + longitude + '&count=10&format=json',true);
 				xhr.send();
 				
-				// Set a five second request timeout for if there is no/a weak connection.
-				requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 5000);
+				requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 60000);
 			}
 		</script>
 	</body>

@@ -6,16 +6,17 @@
 		<title>Feedbak</title>
 		<link href="img/favicon.ico" rel="icon" type="image/x-icon"/>
 		<link href="css/app.css" rel="stylesheet"/>
+		<script src="js/app.js"></script>
 	</head>
 	<body>
 		<div class="header">
 			<img id="headerImage" src="img/feedbak.png" alt="Feedbak"/>
 		</div>
 		<div class="instructions">Please take a minute to complete this survey</div>
-		<div class="survey">
+		<div class="content">
 			<div style="text-align:center;">
 				<span style="font-weight:bold;">Quick Response Buttons</span><br/>
-				<img src="img/happy.png"/> &nbsp; <img src="img/poker.png"/> &nbsp; <img src="img/sad.png"/>
+				<img id="happyImage" src="img/happy.png"/> &nbsp; <img id="neutralImage" src="img/poker.png"/> &nbsp; <img id="sadImage" src="img/sad.png"/>
 			</div>
 			<br/>
 			<label for="employeeFullName">Employee's Full Name</label><br/>
@@ -27,7 +28,7 @@
 			</div>
 			<div class="commentsQuestion">Is there anything we could have done better to improve your experience?</div>
 			<textarea id="comments"></textarea><br/>
-			<p class="copyrightInfo">The CIBC logo is a trademark of Canadian Imperial Bank of Commerce, used by FirstCaribbean International Bank under license.</p>
+			<p class="copyrightInfo">The feedbak logo you see now is only a placeholder for what will be eventually used, and yes I know it looks like Facebook.</p>
 			<div class="buttonContainer">
 				<input id="submitButton" type="button" value="SUBMIT"/>
 			</div>
@@ -37,6 +38,8 @@
 			if (!branchId) {
 				history.go(-1); // back to the main page if no branchID is found.
 			} else {
+				var surveyLoaded = false;
+				
 				window.addEventListener('load',getSurvey,false);
 				function getSurvey() {
 					var requestTimeout;
@@ -64,15 +67,15 @@
 									questionTextDiv.appendChild(document.createTextNode(response['questions'][i]['questionText']));
 									theSurvey.appendChild(surveyQuestion);
 								}
+								surveyLoaded = true;
 							}
 						}
 					}
 					
-					xhr.open('GET','http://localhost:8080/feedbak/server/getsurvey.php?branchId=' + branchId,true);
+					xhr.open('GET',host + '/feedbak/server/getsurvey.php?branchId=' + branchId,true);
 					xhr.send();
 					
-					// Set a one second request timeout for if there is no/a weak connection.
-					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 10000);
+					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 60000);
 				}
 				
 				document.getElementById('submitButton').addEventListener('click',submitResults,false);
@@ -92,7 +95,7 @@
 					}
 					
 					// create the request.
-					xhr.open('POST','http://localhost:8080/feedbak/server/saveresults.php',true);
+					xhr.open('POST',host + '/feedbak/server/saveresults.php',true);
 					
 					var employeeFullName = document.getElementById('employeeFullName').value;
 					var comments = document.getElementById('comments').value;
@@ -104,15 +107,36 @@
 						postData += '&question' + id + '=' + answer;
 					}
 					
-					// Send the proper header information along with the request
 					xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-					//xhr.setRequestHeader('Content-length', postData.length);
-					//xhr.setRequestHeader('Connection', 'close');
 					xhr.send(postData);
 					
-					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 10000);
+					requestTimeout = setTimeout(function() { xhr.abort(); alert('Unable to contact the server.'); }, 60000);
+				}
+				
+				document.getElementById('happyImage').addEventListener('click',aok,false);
+				function aok() {
+					setAllRepliesTo(4);
+				}
+				
+				document.getElementById('neutralImage').addEventListener('click',soso,false);
+				function soso() {
+					setAllRepliesTo(2);
+				}
+				
+				document.getElementById('sadImage').addEventListener('click',turble,false);
+				function turble() {
+					setAllRepliesTo(0);
+				}
+				
+				function setAllRepliesTo(value) {
+					if (surveyLoaded) {
+						var theSurvey = document.getElementById('theSurvey');
+						for (var i = 0, n = theSurvey.childNodes.length; i < n; i++) {
+							theSurvey.childNodes[i].getElementsByTagName('select')[0].value = value;
+						}
+					}
 				}
 			}
 		</script>
 	</body>
-</html>s
+</html>
