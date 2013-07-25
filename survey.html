@@ -45,29 +45,33 @@
 					var requestTimeout;
 					var xhr = new XMLHttpRequest();
 					xhr.onreadystatechange = function() {
-						if (xhr.readyState == 4 && xhr.status == 200) {
-							if (requestTimeout) clearTimeout(requestTimeout);
-							var response = JSON.parse(xhr.responseText);
-							if (response['error']) {
-								alert('There was a problem getting the survey from the server.');
-							} else {
-								var theSurvey = document.getElementById('theSurvey');
-								var questionTemplate = document.getElementById('questionTemplate');
-								for (var i in response['questions']) {
-									var surveyQuestion = questionTemplate.cloneNode(true);
-									surveyQuestion.style.display = 'block';
-									surveyQuestion.id = response['questions'][i]['id'];
-									var questionNumber = 1+parseInt(i);
-									var questionNumberText = (questionNumber >= 10 ? questionNumber : '0' + questionNumber);
-									questionNumberText += '.';
-									var divs = surveyQuestion.getElementsByTagName('div'); 
-									var questionNumberDiv = divs[0];
-									questionNumberDiv.appendChild(document.createTextNode(questionNumberText));
-									var questionTextDiv = divs[1];
-									questionTextDiv.appendChild(document.createTextNode(response['questions'][i]['questionText']));
-									theSurvey.appendChild(surveyQuestion);
+						if (xhr.readyState == 4) {
+							if (xhr.status == 200) {
+								if (requestTimeout) clearTimeout(requestTimeout);
+								var response = JSON.parse(xhr.responseText);
+								if (response['error']) {
+									alert('There was a problem getting the survey from the server.');
+								} else {
+									var theSurvey = document.getElementById('theSurvey');
+									var questionTemplate = document.getElementById('questionTemplate');
+									for (var i in response['questions']) {
+										var surveyQuestion = questionTemplate.cloneNode(true);
+										surveyQuestion.style.display = 'block';
+										surveyQuestion.id = response['questions'][i]['id'];
+										var questionNumber = 1+parseInt(i);
+										var questionNumberText = (questionNumber >= 10 ? questionNumber : '0' + questionNumber);
+										questionNumberText += '.';
+										var divs = surveyQuestion.getElementsByTagName('div'); 
+										var questionNumberDiv = divs[0];
+										questionNumberDiv.appendChild(document.createTextNode(questionNumberText));
+										var questionTextDiv = divs[1];
+										questionTextDiv.appendChild(document.createTextNode(response['questions'][i]['questionText']));
+										theSurvey.appendChild(surveyQuestion);
+									}
+									surveyLoaded = true;
 								}
-								surveyLoaded = true;
+							} else {
+								alert(xhr.status);
 							}
 						}
 					}
@@ -83,13 +87,17 @@
 					var requestTimeout;
 					var xhr = new XMLHttpRequest();
 					xhr.onreadystatechange = function() {
-						if (xhr.readyState == 4 && xhr.status == 200) {
-							if (requestTimeout) clearTimeout(requestTimeout);
-							var response = JSON.parse(xhr.responseText);
-							if (response['status'] == 'success') {
-								location.replace('thanks.html');
+						if (xhr.readyState == 4) {
+							if (xhr.status == 200) {
+								if (requestTimeout) clearTimeout(requestTimeout);
+								var response = JSON.parse(xhr.responseText);
+								if (response['status'] == 'success') {
+									location.replace('thanks.html');
+								} else {
+									alert(response['error']);
+								}
 							} else {
-								alert(response['error']);
+								alert(xhr.status);
 							}
 						}
 					}

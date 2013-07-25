@@ -48,42 +48,46 @@
 				var requestTimeout;
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
-					if (xhr.readyState == 4 && xhr.status == 200) {
-						if (requestTimeout) clearTimeout(requestTimeout);
-						var usingJSON = true;
-						if (usingJSON) {
-							var response = JSON.parse(xhr.responseText);
-						} else {
-							var parser = new DOMParser();
-							var response = parser.parseFromString(xhr.responseXML,'text/xml');
-							console.log(response);
-						}
-						
-						if (response['error']) {
-							alert('There was a problem getting results from the server.');
-						} else {
-							var branchList = document.getElementById('branchList');
-							if (branchList != null) {
-								while (branchList.childNodes.length > 0) {
-									branchList.lastChild.removeEventListener('click');
-									branchList.removeChild(branchList.lastChild);
-								}
-								for (var i in response['branches']) {
-									var branchListItem = document.createElement('li');
-									console.log(response['branches'][i]['branch'] + ' ' + response['branches'][i]['distance']);
-									if (response['branches'][i]['distance'] < distanceThreshold) {
-										branchListItem.style.color = '#00FF00';
+					if (xhr.readyState == 4) {
+						if (xhr.status == 200) {
+							if (requestTimeout) clearTimeout(requestTimeout);
+							var usingJSON = true;
+							if (usingJSON) {
+								var response = JSON.parse(xhr.responseText);
+							} else {
+								var parser = new DOMParser();
+								var response = parser.parseFromString(xhr.responseXML,'text/xml');
+								console.log(response);
+							}
+							
+							if (response['error']) {
+								alert('There was a problem getting results from the server.');
+							} else {
+								var branchList = document.getElementById('branchList');
+								if (branchList != null) {
+									while (branchList.childNodes.length > 0) {
+										branchList.lastChild.removeEventListener('click');
+										branchList.removeChild(branchList.lastChild);
 									}
-									branchListItem.id = response['branches'][i]['id'];
-									branchListItem.appendChild(document.createTextNode(response['branches'][i]['branch']));
-									branchListItem.appendChild(document.createElement('hr'));
-									branchListItem.addEventListener('click',function(e){
-										navigator.geolocation.clearWatch(watchId);
-										window.location.href = 'survey.html?branchID=' + e.target.id;
-									},false);
-									branchList.appendChild(branchListItem);
+									for (var i in response['branches']) {
+										var branchListItem = document.createElement('li');
+										console.log(response['branches'][i]['branch'] + ' ' + response['branches'][i]['distance']);
+										if (response['branches'][i]['distance'] < distanceThreshold) {
+											branchListItem.style.color = '#00FF00';
+										}
+										branchListItem.id = response['branches'][i]['id'];
+										branchListItem.appendChild(document.createTextNode(response['branches'][i]['branch']));
+										branchListItem.appendChild(document.createElement('hr'));
+										branchListItem.addEventListener('click',function(e){
+											navigator.geolocation.clearWatch(watchId);
+											window.location.href = 'survey.html?branchID=' + e.target.id;
+										},false);
+										branchList.appendChild(branchListItem);
+									}
 								}
 							}
+						} else {
+							alert(xhr.status);
 						}
 					}
 				}
