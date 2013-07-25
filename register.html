@@ -103,13 +103,12 @@
 							var response = JSON.parse(xhr.responseText);
 							if (response['userId']) {
 								localStorage.userId = response['userId'];
-								localStorage.userId = xhr.responseText;
 								location.replace('main.html');
 							} else if (response['invalid']) {
 								alert(response['invalid']);
 							}
 						} else {
-							alert(xhr.status);
+							alert('Error: ' + xhr.status + ' ' + xhr.statusText + ', Headers: ' + xhr.getAllResponseHeaders() );
 						}
 					}
 				}
